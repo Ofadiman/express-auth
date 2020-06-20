@@ -1,1 +1,7 @@
+# folders
 node_modules
+
+# environment
+.env.development
+.env.development
+.env.production

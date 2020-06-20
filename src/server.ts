@@ -1,18 +1,33 @@
-import mongoose from 'mongoose'
-import { app } from 'app'
+import { APP_CONFIG } from 'app/app.config'
+import { app } from 'app/app'
+import { databaseService } from 'database/database.service'
 
-mongoose
-  .connect('mongodb://localhost:27017/express-utils', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    bufferCommands: false,
-    useCreateIndex: true
+databaseService.connect()
+
+const server = app.listen(APP_CONFIG.PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`App is running on port: ${APP_CONFIG.PORT}!`)
+})
+
+process
+  .on('uncaughtException', (error) => {
+    // eslint-disable-next-line no-console
+    console.log('Error: ', error)
+    process.exit(1)
   })
-  .then(() => {
-    app.listen(3000, () => {
-      console.log('App is running on port: 3000!')
+  .on('unhandledRejection', (error) => {
+    // eslint-disable-next-line no-console
+    console.log('Error: ', error)
+    // Gracefully shut down the server.
+    server.close(() => {
+      process.exit(1)
     })
   })
-  .catch(() => {
-    console.log('Something went wrong while connecting to database.')
+  .on('SIGTERM', () => {
+    // eslint-disable-next-line no-console
+    console.log('"Ctrl + C" pressed. Shutting down the server gracefully!')
+    server.close(() => {
+      // eslint-disable-next-line no-console
+      console.log('Process terminated!')
+    })
   })

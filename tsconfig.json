@@ -6,8 +6,9 @@
     "moduleResolution": "Node",
     "outDir": "dist",
     "strict": true,
-    "target": "es5"
+    "target": "es5",
+    "typeRoots": ["./src/utils/types/environment.d.ts", "./node_modules/@types"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

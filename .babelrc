@@ -7,9 +7,17 @@
         "root": ["./src"],
         "alias": {
           "app": "./src/app",
-          "auth": "./src/auth"
+          "auth": "./src/auth",
+          "config": "./src/config",
+          "database": "./src/database",
+          "email": "./src/email",
+          "jwt": "./src/jwt",
+          "middlewares": "./src/middlewares",
+          "user": "./src/user",
+          "utils": "./src/utils"
         }
       }
-    ]
+    ],
+    "@babel/plugin-proposal-class-properties"
   ]
 }
