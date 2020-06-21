@@ -10,9 +10,9 @@ const sendRegistrationEmail = async (config: ISendRegistrationEmailConfig) => {
 
   const emailData = {
     from: APP_CONFIG.EMAIL_FROM,
-    html: `<p>Hello ${username}. Visit: </p><p>${APP_CONFIG.EMAIL_SERVICE_API_KEY}/auth/activate-account/${jwt}</p>`,
+    html: `<p>Hello ${username}. Visit: </p><p>${APP_CONFIG.CLIENT_URL}/auth/activate-account/${jwt}</p>`,
     subject: 'Express utils account activation.',
-    to
+    to: APP_CONFIG.EMAIL_TO || to
   }
 
   await sendgrid.send(emailData)

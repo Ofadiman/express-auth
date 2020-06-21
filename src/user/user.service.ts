@@ -20,6 +20,14 @@ const getUserByEmail = async (email: string): Promise<IUserModel | null> => {
   return user
 }
 
+const getUserWithHashedPasswordByEmail = async (email: string): Promise<IUserModel | null> => {
+  const user = UserModel.findOne({ email }, '+hashedPassword')
+
+  if (!user) throw new UserNotFoundException()
+
+  return user
+}
+
 const createUser = async (newUserData: IRegisterUserData): Promise<IUserModel> => {
   const { email, password, username } = newUserData
 
@@ -28,4 +36,9 @@ const createUser = async (newUserData: IRegisterUserData): Promise<IUserModel> =
   return UserModel.create({ email, username, hashedPassword })
 }
 
-export const userService = { getUserById, getUserByEmail, createUser }
+export const userService = {
+  getUserById,
+  getUserByEmail,
+  createUser,
+  getUserWithHashedPasswordByEmail
+}

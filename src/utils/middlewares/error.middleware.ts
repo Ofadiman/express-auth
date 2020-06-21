@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 
 import { DuplicatedMongoDBKeyException } from 'utils/exceptions/DuplicatedMongoDBKey.exception'
+import { SomethingWentWrongException } from 'utils/exceptions/SomethingWentWrong.exception'
+import { APP_CONFIG } from 'app/app.config'
 
 export const errorMiddleware = (
   err: any,
@@ -38,7 +40,20 @@ export const errorMiddleware = (
     return res.json(err)
   }
 
-  const { statusCode, message, name } = err
+  if (err.isCustomAppError) {
+    const { statusCode, message, name } = err
+    return res.status(statusCode).json({
+      message,
+      name,
+      statusCode
+    })
+  }
+
+  if (APP_CONFIG.NODE_ENV === 'development') {
+    return res.status(500).json({ err })
+  }
+
+  const { statusCode, message, name } = new SomethingWentWrongException()
   return res.status(statusCode).json({
     message,
     name,

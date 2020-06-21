@@ -1,5 +1,7 @@
 import bcrypt from 'bcryptjs'
 
+import { IRegisterUserData } from 'auth/typescript/RegisterUserData.interface'
+import { InvalidEmailSyntaxException } from 'auth/exceptions/InvalidEmailSyntax.exception'
 import { InvalidPasswordCharactersException } from 'auth/exceptions/InvalidPasswordCharacters.exception'
 import { MismatchedPasswordsException } from 'auth/exceptions/MismatchedPasswords.exception'
 import { MismatchedPropertyLengthException } from 'utils/exceptions/MismatchedPropertyLength.exception'
@@ -7,7 +9,6 @@ import { MismatchedPropertyTypeException } from 'utils/exceptions/MismatchedProp
 import { MissingPropertyKeyException } from 'utils/exceptions/MissingPropertyKey.exception'
 import { validateConfirmationPassword } from 'utils/validators/validateConfirmationPassword'
 import { validatePasswordCharacters } from 'utils/validators/validatePasswordCharacters'
-import { IRegisterUserData } from 'auth/typescript/RegisterUserData.interface'
 
 const validateCreateUserData = (userData: any): IRegisterUserData => {
   const { username, email, password, confirmationPassword } = userData
@@ -30,6 +31,12 @@ const validateCreateUserData = (userData: any): IRegisterUserData => {
       typeof confirmationPassword
     )
 
+  const emailRegex = new RegExp(
+    "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+  )
+
+  if (!emailRegex.test(email)) throw new InvalidEmailSyntaxException()
+
   if (username.length < 4) throw new MismatchedPropertyLengthException('username', 4, 'to-short')
   if (username.length > 20) throw new MismatchedPropertyLengthException('username', 20, 'to-long')
 
@@ -47,4 +54,7 @@ const validateCreateUserData = (userData: any): IRegisterUserData => {
 
 const hashPassword = async (password: string): Promise<string> => bcrypt.hash(password, 12)
 
-export const authService = { validateCreateUserData, hashPassword }
+const comparePasswords = async (password: string, hashedPassword: string): Promise<boolean> =>
+  bcrypt.compare(password, hashedPassword)
+
+export const authService = { validateCreateUserData, hashPassword, comparePasswords }

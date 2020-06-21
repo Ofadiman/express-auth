@@ -4,7 +4,9 @@ import { authService } from 'auth/auth.service'
 import { emailService } from 'email/email.service'
 import { jwtService } from 'jwt/jwt.service'
 import { userService } from 'user/user.service'
+import { InvalidCredentialsException } from 'auth/exceptions/InvalidCredentials.exception'
 import { MissingAccountActivationTokenException } from 'auth/exceptions/MissingAccountActivationToken.exception'
+import { UserNotFoundException } from 'user/exceptions/UserNotFound.exception'
 import { UserWithThatEmailAlreadyExistsException } from 'auth/exceptions/UserWithThatEmailAlreadyExists.exception'
 import { withTryCatch } from 'utils/helpers/withTryCatch'
 
@@ -29,9 +31,31 @@ const activateAccount = withTryCatch(async (req: Request, res: Response) => {
 
   const accountActivationJwtPayload = jwtService.verifyAccountActivationJwt(accountActivationToken)
 
-  const user = await userService.createUser({ ...accountActivationJwtPayload })
+  await userService.createUser({ ...accountActivationJwtPayload })
 
-  res.status(201).json({ user })
+  res.status(201).json({ message: 'Successful account activation. Please login.' })
 })
 
-export const authController = { registerUser, activateAccount }
+const login = withTryCatch(async (req: Request, res: Response) => {
+  const { email, password } = req.body
+
+  const user = await userService.getUserWithHashedPasswordByEmail(email)
+
+  if (!user) throw new UserNotFoundException()
+
+  const isPasswordCorrect = authService.comparePasswords(password, user.hashedPassword)
+
+  if (!isPasswordCorrect) throw new InvalidCredentialsException()
+
+  const authJwt = await jwtService.signAuthenticationJwt(user._id)
+
+  res.cookie('Authentication', `Bearer ${authJwt}`, {
+    httpOnly: true
+  })
+
+  res
+    .status(200)
+    .json({ message: 'Successful authentication!', username: user.username, email: user.email })
+})
+
+export const authController = { registerUser, activateAccount, login }

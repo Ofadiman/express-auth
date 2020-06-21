@@ -14,6 +14,16 @@ const verifyAccountActivationJwt = (token: string): IRegisterUserData => {
   return verify(token, APP_CONFIG.JWT_SECRET_ACCOUNT_ACTIVATION) as IRegisterUserData
 }
 
+const signAuthenticationJwt = (payload: string) =>
+  sign({ userId: payload }, APP_CONFIG.JWT_SECRET_LOGIN, {
+    expiresIn: APP_CONFIG.JWT_EXPIRES_IN_LOGIN
+  })
+
 const decodeJwt = (token: string) => decode(token)
 
-export const jwtService = { verifyAccountActivationJwt, decodeJwt, signAccountActivationJwt }
+export const jwtService = {
+  verifyAccountActivationJwt,
+  decodeJwt,
+  signAccountActivationJwt,
+  signAuthenticationJwt
+}

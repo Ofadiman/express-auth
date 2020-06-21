@@ -6,3 +6,4 @@ export const authRouter = Router()
 
 authRouter.post('/auth/register', authController.registerUser)
 authRouter.post('/auth/activate-account', authController.activateAccount)
+authRouter.post('/auth/login', authController.login)
