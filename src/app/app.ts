@@ -13,5 +13,7 @@ appService.initializeProductionMiddlewares(app)
 // Routers are best listed in the end of the app config.
 appService.initializeRouters(app, [authRouter, userRouter])
 
+appService.initializeNotFoundHandler(app)
+
 // Error handling middlewares has to be listed as the last one.
 appService.initializeErrorHandling(app)

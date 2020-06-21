@@ -1,6 +1,6 @@
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import express, { Express, Router } from 'express'
+import express, { Express, Request, Response, Router } from 'express'
 import helmet from 'helmet'
 import morgan from 'morgan'
 
@@ -38,6 +38,12 @@ const initializeRouters = (app: Express, routers: Router[]): void => {
   })
 }
 
+const initializeNotFoundHandler = (app: Express) => {
+  app.all('*', (req: Request, res: Response) => {
+    res.status(404).json({ error: `${req.originalUrl} path not found on the server!` })
+  })
+}
+
 const initializeErrorHandling = (app: Express): void => {
   app.use(errorMiddleware)
 }
@@ -46,5 +52,6 @@ export const appService = {
   initializeDevelopmentMiddlewares,
   initializeErrorHandling,
   initializeProductionMiddlewares,
-  initializeRouters
+  initializeRouters,
+  initializeNotFoundHandler
 }
