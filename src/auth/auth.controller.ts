@@ -90,10 +90,31 @@ const resetPassword = withTryCatch(async (req: Request, res: Response) => {
   res.status(200).json({ message: 'Password has been successfully updated!' })
 })
 
+const changePassword = withTryCatch(async (req: Request, res: Response) => {
+  const { oldPassword, newPassword, email } = req.body
+
+  validatePassword(newPassword)
+
+  const user = await userService.getUserWithHashedPasswordByEmail(email)
+
+  if (!user) throw new UserNotFoundException()
+
+  const isOldPasswordCorrect = await authService.comparePasswords(oldPassword, user.hashedPassword)
+
+  if (!isOldPasswordCorrect) throw new InvalidCredentialsException()
+
+  const hashedPassword = await authService.hashPassword(newPassword)
+
+  await user.updateOne({ hashedPassword })
+
+  res.status(200).json({ message: 'Password successfully updated!' })
+})
+
 export const authController = {
   registerUser,
   activateAccount,
   login,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  changePassword
 }
