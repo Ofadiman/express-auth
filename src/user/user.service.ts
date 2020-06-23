@@ -36,9 +36,14 @@ const createUser = async (newUserData: IRegisterUserData): Promise<IUserModel> =
   return UserModel.create({ email, username, hashedPassword })
 }
 
+const findOneAndUpdate = async <T>(email: string, data: Partial<T>) => {
+  await UserModel.findOneAndUpdate({ email }, data)
+}
+
 export const userService = {
   getUserById,
   getUserByEmail,
   createUser,
-  getUserWithHashedPasswordByEmail
+  getUserWithHashedPasswordByEmail,
+  findOneAndUpdate
 }

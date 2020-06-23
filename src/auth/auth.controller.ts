@@ -8,7 +8,9 @@ import { InvalidCredentialsException } from 'auth/exceptions/InvalidCredentials.
 import { MissingAccountActivationTokenException } from 'auth/exceptions/MissingAccountActivationToken.exception'
 import { UserNotFoundException } from 'user/exceptions/UserNotFound.exception'
 import { UserWithThatEmailAlreadyExistsException } from 'auth/exceptions/UserWithThatEmailAlreadyExists.exception'
+import { validateEmail } from 'utils/validators/validateEmail'
 import { withTryCatch } from 'utils/helpers/withTryCatch'
+import { validatePassword } from 'utils/validators/validatePassword'
 
 const registerUser = withTryCatch(async (req: Request, res: Response) => {
   const { email, password, username } = authService.validateCreateUserData(req.body)
@@ -58,4 +60,40 @@ const login = withTryCatch(async (req: Request, res: Response) => {
     .json({ message: 'Successful authentication!', username: user.username, email: user.email })
 })
 
-export const authController = { registerUser, activateAccount, login }
+const forgotPassword = withTryCatch(async (req: Request, res: Response) => {
+  const { email } = req.body
+
+  validateEmail(email)
+
+  const user = userService.getUserByEmail(email)
+
+  if (!user) throw new UserNotFoundException()
+
+  const passwordResetJwt = jwtService.signPasswordResetJwt(email)
+
+  await emailService.sendPasswordResetEmail({ passwordResetJwt, to: email })
+
+  res.status(200).json({ message: 'Email with password reset details has been send to you.' })
+})
+
+const resetPassword = withTryCatch(async (req: Request, res: Response) => {
+  const { newPassword, passwordResetToken } = req.body
+
+  validatePassword(newPassword)
+
+  const { email } = jwtService.verifyPasswordResetJwt(passwordResetToken)
+
+  const hashedPassword = await authService.hashPassword(newPassword)
+
+  await userService.findOneAndUpdate(email, { hashedPassword })
+
+  res.status(200).json({ message: 'Password has been successfully updated!' })
+})
+
+export const authController = {
+  registerUser,
+  activateAccount,
+  login,
+  forgotPassword,
+  resetPassword
+}

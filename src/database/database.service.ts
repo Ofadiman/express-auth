@@ -7,10 +7,11 @@ const connect = () =>
     .connect(
       `mongodb://${APP_CONFIG.MONGODB_HOST}:${APP_CONFIG.MONGODB_PORT}/${APP_CONFIG.DATABASE_NAME}`,
       {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
         bufferCommands: false,
-        useCreateIndex: true
+        useCreateIndex: true,
+        useFindAndModify: false,
+        useNewUrlParser: true,
+        useUnifiedTopology: true
       }
     )
     .then(() => {
